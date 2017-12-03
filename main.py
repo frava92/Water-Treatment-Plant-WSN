@@ -1,7 +1,7 @@
-#!/usr/bin/env python
+#! /usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  untitled.py
+#  main.py
 #  
 #  Copyright 2017  <pi@raspberrypi>
 #  
@@ -25,26 +25,50 @@
 import time
 import serial
 from datetime import datetime
-import Xbee
+import XBee
 
-def main(args):
-    return 0
+dir_OD = 0x0E01
+dir_ORP = 0X0E04
+frame_OPT = 0x00
+frame_ID = 0x01
+req_DATA = (bytearray.fromhex("41 3C"))
 
-if __name__ == '__main__':
-    import sys
-    xbee = XBee.XBee("/dev/ttyUSB0")
-    Msg = xbee.Receive()
-    if Msg:
+
+#Initializar xbee port
+xbee = XBee.XBee("/dev/ttyUSB5")
+msg = 0
+#Send Data Request for OD and wait for the response
+xbee.Send(req_DATA,dir_OD,frame_OPT,frame_ID)
+while msg == 0:
+	frame = xbee.Receive()
+	if frame != None:
+		msg = 1	
+		time.sleep(0.25)
 		year = datetime.now().year
 		month = datetime.now().month
 		day = datetime.now().day
 		hour = datetime.now().hour
 		minute = datetime.now().minute
 		second = datetime.now().second
+		data_OD = frame[7:-1]
+		print xbee.format(data_OD)
+xbee.Send(req_DATA,dir_ORP,frame_OPT,frame_ID)
+msg = 0
+while msg == 0:
+	frame = xbee.Receive()
+	if frame != None:
+		msg = 1	
+		time.sleep(0.25)
+		year = datetime.now().year
+		month = datetime.now().month
+		day = datetime.now().day
+		hour = datetime.now().hour
+		minute = datetime.now().minute
+		second = datetime.now().second
+		data_ORP = frame[7:-1]
+		print xbee.format(data_ORP)
 		
-		conn = sqlite3.connect('./db/PTAR_Residencial_Belen.db')
-		with conn:
-			cur=conn.cursor()
-			cur.execute("INSERT INTO mediciones values(?, ?, ?, ?, ?, ?, ?, ?);", (counter, year, month, day, hour, minute, second, DATA))
-	
-    sys.exit(main(sys.argv))
+file = open("/var/spool/sms/outgoing/text","w")
+file.write("To: 50688393752\n")
+file.write("\n")
+file.write("ORP: %s OD: %s" % (xbee.format(data_ORP), xbee.format(data_OD)))
