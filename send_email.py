@@ -28,13 +28,13 @@ def read_template(filename):
     file specified by filename.
     """
 
-    with open("email/messages/message.txt", 'r', encoding='utf-8') as template_file:
+    with open("email/messages/temaplte.txt", 'r', encoding='utf-8') as template_file:
         template_file_content = template_file.read()
     return Template(template_file_content)
 
 def main():
     names, emails = get_contacts('mycontacts.txt') # read contacts
-    message_template = read_template('message.txt')
+    message_template = read_template('template.txt')
 
     # set up the SMTP server
     s = smtplib.SMTP(host='smtp.gmail.com', port=587)
