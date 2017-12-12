@@ -25,7 +25,7 @@
 import time
 import serial
 from datetime import datetime
-import XBee
+import lib.XBee
 import sqlite3
 from datetime import datetime
 
@@ -64,7 +64,9 @@ def request_data ():
 
 
 def db_insert(data):
-	pass
+	cur = conn.cursor()
+	cur.execute()
+
 
 file = open("/var/spool/sms/outgoing/text","w")
 file.write("To: 50689812235\n")
