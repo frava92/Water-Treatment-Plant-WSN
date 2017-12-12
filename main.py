@@ -68,12 +68,14 @@ def db_insert(data):
 	cur.execute()
 
 
+
 file = open("/var/spool/sms/outgoing/text","w")
 file.write("To: 50689812235\n")
 file.write("\n")
 file.write("ORP: %s OD: %s" % (xbee.format(data_ORP), xbee.format(data_OD)))
 
 def main():
+	data_OD = request_data
 
 
 if __name__ == '__main__':
