@@ -28,7 +28,7 @@ def read_template(filename):
     file specified by filename.
     """
 
-    with open("email/messages/temaplte.txt", 'r', encoding='utf-8') as template_file:
+    with open("email/messages/tempalte.txt", 'r', encoding='utf-8') as template_file:
         template_file_content = template_file.read()
     return Template(template_file_content)
 
@@ -46,7 +46,7 @@ def main():
         msg = MIMEMultipart()       # create a message
 
         # add in the actual person name to the message template
-        message = message_template.substitute(PERSON_NAME=name.title())
+        message = message_template.substitute(PERSON_NAME=name.title(),DAY=datetime.now().date())
 
         # Prints out the message body for our sake
         print(message)

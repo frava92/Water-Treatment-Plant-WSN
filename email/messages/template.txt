@@ -1,5 +1,7 @@
 Estimado (a): ${PERSON_NAME},
 
+Resumen del dia: $(DAY)
+
 This is a test message.
 Have a great weekend!
 

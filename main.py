@@ -27,10 +27,10 @@ import serial
 from datetime import datetime
 import lib.XBee
 import sqlite3
+from sqlite3 import Error
 from datetime import datetime
 
 dir_OD = 0x0E01
-dir_ORP = 0X0E04
 frame_OPT = 0x00
 frame_ID = 0x01
 req_DATA = (bytearray.fromhex("41 3C"))
@@ -53,17 +53,25 @@ def request_data ():
 		if frame != None:
 			msg = 1
 			time.sleep(0.25)
-			year = datetime.now().year
-			month = datetime.now().month
-			day = datetime.now().day
-			hour = datetime.now().hour
-			minute = datetime.now().minute
-			second = datetime.now().second
-			data_OD = frame[7:-1]
 			return xbee.format(data_OD)
 
+def send_alert():
+	pass
 
 def db_insert(data):
+	pass
+
+
+def connect_db(db_file):
+	try:
+		conn = sqlite3.connect(db_file)
+		return conn
+	except Error as e:
+		print(e)
+
+	return None
+
+
 	cur = conn.cursor()
 	cur.execute()
 
@@ -76,6 +84,10 @@ file.write("ORP: %s OD: %s" % (xbee.format(data_ORP), xbee.format(data_OD)))
 
 def main():
 	data_OD = request_data
+	db_insert(data_OD)
+	if data_OD < 1,5 or data_OD > 4,0:
+		send_alert
+
 
 
 if __name__ == '__main__':
