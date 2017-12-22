@@ -127,16 +127,9 @@ void string_pars() {                  //this function will break up the CSV stri
     Serial.println(sat);              //print the reading
     flag = 0;                         //reset the flag
   }
-                                      
+
     /*                                //uncomment this section if you want to take the ASCII values and convert them into a floating point number.
     DO_float=atof(DO);
     sat_float=atof(sat);
-   */ 
+   */
 }
-
-
-
-
-
-
-
