@@ -24,11 +24,22 @@
 
 import time
 import serial
-from datetime import datetime
 import lib.XBee
+from lib.ptarlib import *
 import sqlite3
 from sqlite3 import Error
 from datetime import datetime
+import smtplib
+from string import Template
+from datetime import datetime, date, timedelta
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import enconders
+import sqlite3
+import pandas as pd
+
+
 
 dir_OD = 0x0E01
 frame_OPT = 0x00
@@ -62,16 +73,6 @@ def db_insert(data):
 	pass
 
 
-def connect_db(db_file):
-	try:
-		conn = sqlite3.connect(db_file)
-		return conn
-	except Error as e:
-		print(e)
-
-	return None
-
-
 	cur = conn.cursor()
 	cur.execute()
 
@@ -83,10 +84,13 @@ file.write("\n")
 file.write("ORP: %s OD: %s" % (xbee.format(data_ORP), xbee.format(data_OD)))
 
 def main():
+
 	data_OD = request_data
+	connect_db
 	db_insert(data_OD)
 	if data_OD < 1,5 or data_OD > 4,0:
 		send_alert
+
 
 
 
