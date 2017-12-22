@@ -35,7 +35,7 @@ from datetime import datetime, date, timedelta
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
-from email import enconders
+from email import encoders
 import sqlite3
 import pandas as pd
 
@@ -47,48 +47,17 @@ frame_ID = 0x01
 req_DATA = (bytearray.fromhex("41 3C"))
 xbee = XBee.XBee("/dev/ttyUSB0")
 
-conn = sqlite3.connect('./db/PTAR_Residencial_Belen.db')
+database = './db/PTAR_Residencial_Belen.db'
 
 #from signal import signal, SIGPIPE, SIG_IGN
 #signal(SIGPIPE,SIG_IGN)
 
-#Initializar xbee port
-
-
-def request_data ():
-	msg = 0
-	#Send Data Request for OD and wait for the response
-	xbee.Send(req_DATA,dir_OD,frame_OPT,frame_ID)
-	while msg == 0:
-		frame = xbee.Receive()
-		if frame != None:
-			msg = 1
-			time.sleep(0.25)
-			return xbee.format(data_OD)
-
-def send_alert():
-	pass
-
-def db_insert(data):
-	pass
-
-
-	cur = conn.cursor()
-	cur.execute()
-
-
-
-file = open("/var/spool/sms/outgoing/text","w")
-file.write("To: 50689812235\n")
-file.write("\n")
-file.write("ORP: %s OD: %s" % (xbee.format(data_ORP), xbee.format(data_OD)))
-
 def main():
 
 	data_OD = request_data
-	connect_db
+	connect_db(database)
 	db_insert(data_OD)
-	if data_OD < 1,5 or data_OD > 4,0:
+	if data_OD < 1.5 or data_OD > 4.0:
 		send_alert
 
 

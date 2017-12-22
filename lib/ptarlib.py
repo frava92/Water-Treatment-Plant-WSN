@@ -4,9 +4,10 @@ from datetime import datetime, date, timedelta
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
-from email import enconders
+from email import encoders
 import sqlite3
 import pandas as pd
+import XBee
 
 
 
@@ -29,7 +30,6 @@ def db_insert(conn,data):
         cur. execute("INSERT INTO mediciones values(?,?);",(datetime.now(),data))
 
 def send_alert():
-
 	pass
 
 def request_data():
