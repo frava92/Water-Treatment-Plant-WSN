@@ -2,7 +2,7 @@
 #include <Wire.h>
 
 #define DIR_central_node 0x0C01
-#define address 100
+#define address 97
 //Creating the Xbee object
 XBee xbee = XBee();
 unsigned long start = millis();
@@ -37,17 +37,19 @@ char ODRequest[20];     //Request sent to the DO (read, info, status, sleep)
 byte responseCode = 0;  //Used to hold the response code coming from the DO (Success, Failed, Pending, No Data)
 byte incomingTX = 0;    //Used as a buffer for the incoming data from the DO
 
+byte debug = 0;
+
 void flashLed(int pin, int times, int wait) {
 
-    for (int i = 0; i < times; i++) {
-      digitalWrite(pin, HIGH);
-      delay(wait);
-      digitalWrite(pin, LOW);
+  for (int i = 0; i < times; i++) {
+    digitalWrite(pin, HIGH);
+    delay(wait);
+    digitalWrite(pin, LOW);
 
-      if (i + 1 < times) {
-        delay(wait);
-      }
+    if (i + 1 < times) {
+      delay(wait);
     }
+  }
 }
 
 
@@ -55,6 +57,7 @@ void setup() {
   pinMode(statusLed, OUTPUT);
   pinMode(errorLed, OUTPUT);
   pinMode(dataLed,  OUTPUT);
+  pinMode(testLed,  OUTPUT);
 
   //Start serial comm
   Serial.begin(9600);
@@ -74,8 +77,61 @@ void loop() {
       PCRequest = rx16.getData(0);
       if (PCRequest == 0x52) {
         //Request Reading
+        digitalWrite(testLed, HIGH);
+        delay(2000);
+        digitalWrite(testLed, LOW);
         strcpy(ODRequest, "r");
-      } else if (PCRequest == 0x49){
+        delay(2000);
+        digitalWrite(testLed, HIGH);
+        delay(2000);
+        digitalWrite(testLed, LOW);
+        Wire.beginTransmission(address);
+        Wire.write("Status");
+        debug = Wire.endTransmission();
+        switch (debug) {
+          case 0:
+          digitalWrite(errorLed, HIGH);
+          delay(2000);
+          digitalWrite(errorLed, LOW);
+
+          case 1:
+          digitalWrite(statusLed, HIGH);
+          delay(2000);
+          digitalWrite(statusLed, LOW);
+
+          case 2:
+          digitalWrite(testLed, HIGH);
+          delay(2000);
+          digitalWrite(testLed, LOW);
+
+          case 3:
+          digitalWrite(dataLed, HIGH);
+          delay(2000);
+          digitalWrite(dataLed, LOW);
+
+          case 4:
+          digitalWrite(testLed, HIGH);
+          digitalWrite(dataLed, HIGH);
+          delay(2000);
+          digitalWrite(testLed, LOW);
+          digitalWrite(dataLed, LOW);
+        }
+        delay(600);
+        Wire.requestFrom(address, 20, 1);
+        responseCode = Wire.read();
+
+
+        while (Wire.available()) {       //are there bytes to receive.
+          incomingTX = Wire.read();         //receive a byte.
+          DO_data[i] = incomingTX;          //load this byte into our array.
+          i += 1;                        //incur the counter for the array element.
+          if (incomingTX == 0) {            //if we see that we have been sent a null command.
+            i = 0;                       //reset the counter i to 0.
+            Wire.endTransmission();      //end the I2C data transmission.
+            break;                       //exit the while loop.
+          }
+        }
+      } /*else if (PCRequest == 0x49){
         //Request Info
         strcpy(ODRequest, "i");
       } else if (PCRequest == 0x53) {
@@ -84,15 +140,20 @@ void loop() {
       } else if (PCRequest == 0x5A) {
         //Sleep
         strcpy(ODRequest, "sleep");
-      }
-      Wire.beginTransmission(address);
-      Wire.write(ODRequest);
-      Wire.endTransmission();
+      }*/
+      // TODO check option, rssi bytes
+      flashLed(statusLed, 1, 10);
 
-      Wire.requestFrom(address, 20, 1); //call the circuit and request 20 bytes (this may be more than we need)
-      responseCode = Wire.read();               //the first byte is the response code, we read this separately.
+      // set dataLed PWM to value of the first byte in the data
+      analogWrite(dataLed, PCRequest);
+      /*Wire.beginTransmission(address);
+        Wire.write(ODRequest);
+        Wire.endTransmission();
 
-      switch (responseCode) {                   //switch case based on what the response code is.
+        Wire.requestFrom(address, 20, 1); //call the circuit and request 20 bytes (this may be more than we need)
+        responseCode = Wire.read();               //the first byte is the response code, we read this separately.
+
+        switch (responseCode) {                   //switch case based on what the response code is.
         case 1:                         //decimal 1.
           Serial.println("Success");    //means the command was successful.
           break;                        //exits the switch case.
@@ -108,9 +169,9 @@ void loop() {
         case 255:                      //decimal 255.
           Serial.println("No Data");   //means there is no further data to send.
           break;                       //exits the switch case.
-      }
+        }
 
-      while (Wire.available()) {       //are there bytes to receive.
+        while (Wire.available()) {       //are there bytes to receive.
         incomingTX = Wire.read();         //receive a byte.
         DO_data[i] = incomingTX;          //load this byte into our array.
         i += 1;                        //incur the counter for the array element.
@@ -119,15 +180,15 @@ void loop() {
           Wire.endTransmission();      //end the I2C data transmission.
           break;                       //exit the while loop.
         }
-      }
+        }*/
 
 
     }
     else {
-        //not something we were expecting
-        flashLed(errorLed, 1, 25);
-      }
-  } else if (xbee.getResponse().isError()) {
+      //not something we were expecting
       flashLed(errorLed, 1, 25);
+    }
+  } else if (xbee.getResponse().isError()) {
+    flashLed(errorLed, 1, 25);
   }
 }
