@@ -47,7 +47,7 @@ void loop() {                   //the main loop.
 
 
     Wire.beginTransmission(address);                                      //call the circuit by its ID number.
-    Wire.write(computerdata);                                             //transmit the command that was sent through the serial port.
+    Wire.write("r");                                             //transmit the command that was sent through the serial port.
     Wire.endTransmission();                                               //end the I2C data transmission.
 
     if (strcmp(computerdata, "sleep") != 0) {  //if the command that has been sent is NOT the sleep command, wait the correct amount of time and request data.
@@ -116,6 +116,11 @@ void string_pars() {                  //this function will break up the CSV stri
   if (flag != 1) {                    //if we see the there WAS NOT a ‘,’ in the string array
     Serial.print("DO:");              //print the identifier
     Serial.println(DO_data);          //print the reading
+    for (int i = 0; i <=20; i++) {
+      payload[i] = (uint8_t) DO_data[i];
+      Serial.println(DO_data[i]);
+      
+    }
   }
 
   if (flag == 1) {                    //if we see the there was a ‘,’ in the string array

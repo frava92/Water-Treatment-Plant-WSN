@@ -2,7 +2,7 @@
 #include <Wire.h>
 
 #define DIR_central_node 0x0C01
-#define address 100
+#define address 97
 //Creating the Xbee object
 XBee xbee = XBee();
 unsigned long start = millis();
@@ -21,6 +21,7 @@ XBeeResponse response = XBeeResponse();
 
 // create reusable response objects for responses we expect to handle
 Rx16Response rx16 = Rx16Response();
+
 
 
 int statusLed = 11;
@@ -55,10 +56,11 @@ void setup() {
   pinMode(statusLed, OUTPUT);
   pinMode(errorLed, OUTPUT);
   pinMode(dataLed,  OUTPUT);
-
+  pinMode(testLed,  OUTPUT);
   //Start serial comm
   Serial.begin(9600);
   xbee.setSerial(Serial);
+  Wire.begin();
 }
 
 void loop() {
@@ -75,6 +77,9 @@ void loop() {
       if (PCRequest == 0x52) {
         //Request Reading
         strcpy(ODRequest, "r");
+        digitalWrite(testLed, HIGH);
+        delay(2000);
+        digitalWrite(testLed, LOW);
       } else if (PCRequest == 0x49){
         //Request Info
         strcpy(ODRequest, "i");
@@ -88,6 +93,9 @@ void loop() {
       Wire.beginTransmission(address);
       Wire.write(ODRequest);
       Wire.endTransmission();
+      digitalWrite(testLed, HIGH);
+      delay(2000);
+      digitalWrite(testLed, LOW);
 
       Wire.requestFrom(address, 20, 1); //call the circuit and request 20 bytes (this may be more than we need)
       responseCode = Wire.read();               //the first byte is the response code, we read this separately.
@@ -120,6 +128,12 @@ void loop() {
           break;                       //exit the while loop.
         }
       }
+      /*for (int j = 0; j <=20; j++) {
+        payload[j] =  uint8_t(DO_data[j]);
+      }*/
+      memcpy(payload, DO_data, 20);
+      xbee.send(tx);
+
 
 
     }

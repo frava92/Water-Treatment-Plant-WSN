@@ -43,7 +43,7 @@ TxStatusResponse txStatus = TxStatusResponse();
 
 //Xbee Receive Config
 XBeeResponse response = XBeeResponse();
-// create reusable response objects for responses we expect to handle 
+// create reusable response objects for responses we expect to handle
 Rx16Response rx16 = Rx16Response();
 
 int statusLed = 11;
@@ -55,12 +55,12 @@ uint8_t data[] = {0, 0};
 uint8_t rssi = 0;
 
 void flashLed(int pin, int times, int wait) {
-    
+
     for (int i = 0; i < times; i++) {
       digitalWrite(pin, HIGH);
       delay(wait);
       digitalWrite(pin, LOW);
-      
+
       if (i + 1 < times) {
         delay(wait);
       }
@@ -71,19 +71,19 @@ void setup() {
   pinMode(statusLed, OUTPUT);
   pinMode(errorLed, OUTPUT);
   pinMode(dataLed,  OUTPUT);
-  
+
   // start serial
   Serial.begin(9600);
   xbee.setSerial(Serial);
-  
+
   flashLed(statusLed, 3, 50);
 }
 
 // continuously reads packets, looking for RX16 or RX64
 void loop() {
-    
+
     xbee.readPacket();
-    
+
     if (xbee.getResponse().isAvailable()) {
       // got something
       if (xbee.getResponse().getApiId() == RX_16_RESPONSE) {
@@ -100,19 +100,18 @@ void loop() {
           xbee.send(tx);
         }
 
-        // TODO check option, rssi bytes    
+        // TODO check option, rssi bytes
         flashLed(statusLed, 1, 10);
-        
+
         // set dataLed PWM to value of the first byte in the data
         analogWrite(dataLed, data);
       } else {
       	// not something we were expecting
-        flashLed(errorLed, 1, 25);    
+        flashLed(errorLed, 1, 25);
       }
     } else if (xbee.getResponse().isError()) {
-      //Serial.print("Error reading packet.  Error code: ");  
+      //Serial.print("Error reading packet.  Error code: ");
       //Serial.println(xbee.getResponse().getErrorCode());
       // or flash error led
-    } 
+    }
 }
-
