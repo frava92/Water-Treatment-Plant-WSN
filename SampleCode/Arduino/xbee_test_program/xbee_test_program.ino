@@ -38,17 +38,19 @@ char ODRequest[20];     //Request sent to the DO (read, info, status, sleep)
 byte responseCode = 0;  //Used to hold the response code coming from the DO (Success, Failed, Pending, No Data)
 byte incomingTX = 0;    //Used as a buffer for the incoming data from the DO
 
+byte debug = 0;
+
 void flashLed(int pin, int times, int wait) {
 
-    for (int i = 0; i < times; i++) {
-      digitalWrite(pin, HIGH);
-      delay(wait);
-      digitalWrite(pin, LOW);
+  for (int i = 0; i < times; i++) {
+    digitalWrite(pin, HIGH);
+    delay(wait);
+    digitalWrite(pin, LOW);
 
-      if (i + 1 < times) {
-        delay(wait);
-      }
+    if (i + 1 < times) {
+      delay(wait);
     }
+  }
 }
 
 
@@ -76,6 +78,9 @@ void loop() {
       PCRequest = rx16.getData(0);
       if (PCRequest == 0x52) {
         //Request Reading
+        digitalWrite(testLed, HIGH);
+        delay(2000);
+        digitalWrite(testLed, LOW);
         strcpy(ODRequest, "r");
         digitalWrite(testLed, HIGH);
         delay(2000);
@@ -97,10 +102,16 @@ void loop() {
       delay(2000);
       digitalWrite(testLed, LOW);
 
-      Wire.requestFrom(address, 20, 1); //call the circuit and request 20 bytes (this may be more than we need)
-      responseCode = Wire.read();               //the first byte is the response code, we read this separately.
+      // set dataLed PWM to value of the first byte in the data
+      analogWrite(dataLed, PCRequest);
+      /*Wire.beginTransmission(address);
+        Wire.write(ODRequest);
+        Wire.endTransmission();
 
-      switch (responseCode) {                   //switch case based on what the response code is.
+        Wire.requestFrom(address, 20, 1); //call the circuit and request 20 bytes (this may be more than we need)
+        responseCode = Wire.read();               //the first byte is the response code, we read this separately.
+
+        switch (responseCode) {                   //switch case based on what the response code is.
         case 1:                         //decimal 1.
           Serial.println("Success");    //means the command was successful.
           break;                        //exits the switch case.
@@ -116,9 +127,9 @@ void loop() {
         case 255:                      //decimal 255.
           Serial.println("No Data");   //means there is no further data to send.
           break;                       //exits the switch case.
-      }
+        }
 
-      while (Wire.available()) {       //are there bytes to receive.
+        while (Wire.available()) {       //are there bytes to receive.
         incomingTX = Wire.read();         //receive a byte.
         DO_data[i] = incomingTX;          //load this byte into our array.
         i += 1;                        //incur the counter for the array element.
@@ -138,10 +149,10 @@ void loop() {
 
     }
     else {
-        //not something we were expecting
-        flashLed(errorLed, 1, 25);
-      }
-  } else if (xbee.getResponse().isError()) {
+      //not something we were expecting
       flashLed(errorLed, 1, 25);
+    }
+  } else if (xbee.getResponse().isError()) {
+    flashLed(errorLed, 1, 25);
   }
 }
