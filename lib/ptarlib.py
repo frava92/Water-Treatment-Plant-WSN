@@ -1,19 +1,21 @@
 import smtplib
 from string import Template
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, time
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 import sqlite3
+from sqlite3 import Error
 import pandas as pd
 import XBee
-
+import time
+import serial
 
 
 MY_ADDRESS = 'fvargas9201@gmail.com'
 PASSWORD = 'FraVarAcu1992'
-EMAIL = "controloperacional@grupoproamsa.com"
+EMAIL = "franzvargas91@gmail.com"
 
 def connect_db(db_file):
 	try:
@@ -25,24 +27,43 @@ def connect_db(db_file):
 	return None
 
 def db_insert(conn,data):
+	currentDT = datetime.now()
+	date_today = currentDT.strftime("%Y-%m-%d")
+	time_now = currentDT.strftime("%H:%M:%S")
     with conn:
         cur = conn.cursor()
-        cur. execute("INSERT INTO mediciones values(?,?);",(datetime.now(),data))
+        cur.execute('INSERT INTO mediciones VALUES(?,?,?);',(date_today,time_now,data))
 
 def send_alert():
-	pass
+    # set up the SMTP server
+    s = smtplib.SMTP(host='smtp.gmail.com', port=587)
+    s.starttls()
+    s.login(MY_ADDRESS, PASSWORD)
+
+    msg = MIMEMultipart()
+
+    msg['From']="PTAR Residencial Belen"
+    msg['To']=EMAIL
+    msg['Subject']="ALERT"
+
+    body = "ALERTA: Niveles de OD fuera del rango permitido"
+    msg.attach(MIMEText(body, 'plain'))
+    text = msg.as_string()
+    s.sendmail(MY_ADDRESS, EMAIL, text)
+    del msg
+    s.quit()
 
 def request_data():
 	msg = 0
 	#Send Data Request for OD and wait for the response
-	xbee.Send(req_DATA,dir_OD,frame_OPT,frame_ID)
+	xbee.SendStr("R",dir_OD,0x00,0x01)
 	while msg == 0:
 		frame = xbee.Receive()
 		if frame != None:
 			msg = 1
 			time.sleep(0.25)
-			return xbee.format(data_OD)
-
+			data_OD = frame[7:-1]
+			return data_OD.decode('ascii')
 
 def send_summary():
 
@@ -57,7 +78,7 @@ def send_summary():
     msg['To']=EMAIL
     msg['Subject']="Status"
 
-    body = "Buenas tardes, adjunto se encuentra el status diario"
+    body = "Buenas tardes, adjunto se encuentra el status del dia"
     msg.attach(MIMEText(body, 'plain'))
 
     filename = "PTAR.Belen_" + str(datetime.now().date()) + ".xlsx"
@@ -84,11 +105,11 @@ def generate_summary(conn):
     today = datetime.now().date()
 
     #Selecting all table data to extract column names
-    cur.execute("select * from temps;")
+    cur.execute("select * from mediciones;")
     columns = cur.fetchone()
 
     #Extracting today's data
-    cur.execute("select * from temps where timestamp between ? and ?;",(today,tomorrow))
+    cur.execute("select * from mediciones where timestamp between ? and ?;",(today,tomorrow))
     today_data = cur.fetchall()
 
     #Generating Data Frame
