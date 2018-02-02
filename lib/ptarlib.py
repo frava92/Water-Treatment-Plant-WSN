@@ -8,9 +8,9 @@ from email import encoders
 import sqlite3
 from sqlite3 import Error
 import pandas as pd
-import XBee
 import time
 import serial
+import XBee
 
 
 MY_ADDRESS = 'fvargas9201@gmail.com'
@@ -26,13 +26,13 @@ def connect_db(db_file):
 
 	return None
 
-def db_insert(conn,data):
+def db_insert(conn, data):
 	currentDT = datetime.now()
 	date_today = currentDT.strftime("%Y-%m-%d")
 	time_now = currentDT.strftime("%H:%M:%S")
-    with conn:
-        cur = conn.cursor()
-        cur.execute('INSERT INTO mediciones VALUES(?,?,?);',(date_today,time_now,data))
+	with conn:
+		cur = conn.cursor()
+		cur.execute('INSERT INTO mediciones VALUES(?,?,?);',(date_today,time_now,data))
 
 def send_alert():
     # set up the SMTP server
