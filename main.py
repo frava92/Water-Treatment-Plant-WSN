@@ -22,34 +22,11 @@
 #
 #
 
-import time
-import serial
-import lib.XBee
 from lib.ptarlib import *
-import sqlite3
-from sqlite3 import Error
-from datetime import datetime
-import smtplib
-from string import Template
-from datetime import datetime, date, timedelta
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.mime.base import MIMEBase
-from email import encoders
-import sqlite3
-import pandas as pd
-
 
 
 dir_OD = 0x0E01
-frame_OPT = 0x00
-frame_ID = 0x01
-req_DATA = (bytearray.fromhex("41 3C"))
 xbee = XBee.XBee("/dev/ttyUSB0")
-<<<<<<< HEAD
-=======
-
->>>>>>> 22e894d6a80720f210cf9d07f13eb0fa58fe1a05
 database = './db/PTAR_Residencial_Belen.db'
 
 #from signal import signal, SIGPIPE, SIG_IGN
@@ -57,12 +34,8 @@ database = './db/PTAR_Residencial_Belen.db'
 
 def main():
 	data_OD = request_data
-<<<<<<< HEAD
 	conn = connect_db(database)
-=======
-	connect_db(database)
->>>>>>> 22e894d6a80720f210cf9d07f13eb0fa58fe1a05
-	db_insert(data_OD)
+	db_insert(conn, data_OD)
 	if data_OD < 1.5 or data_OD > 4.0:
 		send_alert
 
