@@ -35,6 +35,8 @@ import pandas as pd
 import time
 import serial
 import XBee
+import logging
+
 
 dir_OD = 0x0E01
 xbee = XBee.XBee("/dev/ttyUSB0")
@@ -48,10 +50,18 @@ EMAIL = "franzvargas91@gmail.com"
 #signal(SIGPIPE,SIG_IGN)
 
 def main():
-	data_OD = request_data
+	logging.basicConfig(format=('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+	logging.info('Program started')
 	conn = connect_db(database)
+	logging.info('Successfully connected to database')
+	logging.info('Requesting reading from sensor')
+	data_OD = request_data
+	logging.info('Successfully received reading from sensor')
+	logging.info('Inserting data into database')
 	db_insert(conn, data_OD)
+	logging.info('Successfully inserted data into database')
 	if data_OD < 1.5 or data_OD > 4.0:
+		logging.info('')
 		send_alert
 
 

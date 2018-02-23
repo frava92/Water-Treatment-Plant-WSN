@@ -116,11 +116,6 @@ void string_pars() {                  //this function will break up the CSV stri
   if (flag != 1) {                    //if we see the there WAS NOT a ‘,’ in the string array
     Serial.print("DO:");              //print the identifier
     Serial.println(DO_data);          //print the reading
-    for (int i = 0; i <=20; i++) {
-      payload[i] = (uint8_t) DO_data[i];
-      Serial.println(DO_data[i]);
-      
-    }
   }
 
   if (flag == 1) {                    //if we see the there was a ‘,’ in the string array
