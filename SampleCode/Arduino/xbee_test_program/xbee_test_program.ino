@@ -144,7 +144,10 @@ void loop() {
       }*/
       memcpy(payload, DO_data, 20);
       xbee.send(tx);
-
+      //Wire.beginTransmission(address);
+      //Wire.write("sleep");
+      //Wire.endTransmission();
+      
 
 
     }
